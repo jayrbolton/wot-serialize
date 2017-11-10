@@ -1,0 +1,26 @@
+{
+  "name": "wot-serialize",
+  "version": "0.0.1",
+  "description": "Save and load wot identities, keyrings, messages, etc to disk",
+  "main": "index.js",
+  "scripts": {
+    "test": "dependency-check package.json && standard && tape test/ | tap-spec"
+  },
+  "keywords": [
+    "crypto",
+    "wot"
+  ],
+  "author": "jayrbolton@gmail.com",
+  "license": "MIT",
+  "devDependencies": {
+    "dependency-check": "^2.9.1",
+    "standard": "^10.0.3",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.8.0"
+  },
+  "dependencies": {
+    "fs-extra": "4.0.2",
+    "run-parallel": "1.1.6",
+    "sodium-universal": "1.4.0"
+  }
+}
