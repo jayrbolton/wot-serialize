@@ -23,6 +23,8 @@ ident.createUser(pass, {name: 'pb'}, function (err, user) {
 
 ## loadUser(passphrase, directory, callback)
 
+Load a user that was saved to a directory. You must pass in the user's passphrase so that the secret keys can get decrypted.
+
 ```js
 loadUser(pass, '/tmp/uzr/', function (err, user) {
   if (err) throw err
