@@ -24,7 +24,7 @@ ident.createUser(pass, {name: 'pb'}, function (err, user) {
 ## loadUser(passphrase, directory, callback)
 
 ```js
-loadUser(pass, '/tmp/uzr/, function (err, user) {
+loadUser(pass, '/tmp/uzr/', function (err, user) {
   if (err) throw err
   // if the passphrase does not match, err will be an Error
   // user will be an object that looks exactly like a user generated in wot-identity with createUser
