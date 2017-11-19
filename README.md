@@ -1,4 +1,3 @@
-
 # wot-serialize
 
 ## saveUser(user, directory, callback)
@@ -9,7 +8,7 @@ Save the `user` to a `directory` with `callback` getting called when done.
 
 `callback` receives an `err` as the first parameter, which will be null if there's no error.
 
-secret keys are saved to disk encrypted
+Only the locked versions of the stamp and key are saved to the disk.
 
 ```js
 ident.createUser(pass, {name: 'pb'}, function (err, user) {

@@ -10,14 +10,14 @@ test('save and load a user to/from disk', t => {
       if (err) throw err
       serialize.loadUser(pass, '/tmp/uzr', function (err, loadedUser) {
         if (err) throw err
-        t.deepEqual(loadedUser.signKeys.sk_plain, user.signKeys.sk_plain, 'decrypts the correct signing secret key')
-        t.deepEqual(loadedUser.boxKeys.sk_plain, user.boxKeys.sk_plain, 'decrypts the correct box secret key')
-        t.deepEqual(loadedUser.signKeys.sk_encrypted, user.signKeys.sk_encrypted, 'loads sign encrypted secret key')
-        t.deepEqual(loadedUser.boxKeys.sk_encrypted, user.boxKeys.sk_encrypted, 'loads box encrypted secret key')
-        t.deepEqual(loadedUser.signKeys.pk, user.signKeys.pk, 'loads sign pub key')
-        t.deepEqual(loadedUser.boxKeys.pk, user.boxKeys.pk, 'loads box pub key')
+        t.deepEqual(loadedUser.stamp_locked, user.stamp_locked, 'loads the locked stamp')
+        t.deepEqual(loadedUser.key_locked, user.key_locked, 'loads the locked key')
+        t.deepEqual(loadedUser.stamp, user.stamp, 'unlocks the stamp')
+        t.deepEqual(loadedUser.key, user.key, 'unlocks the key')
+        t.deepEqual(loadedUser.imprint, user.imprint, 'loads the imprint')
+        t.deepEqual(loadedUser.lock, user.lock, 'loads the lock')
         t.deepEqual(loadedUser.cert, user.cert, 'loads cert')
-        t.deepEqual(loadedUser.salt, user.salt, 'loads salt')
+        t.deepEqual(loadedUser._salt, user._salt, 'loads salt')
         t.end()
       })
     })

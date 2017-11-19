@@ -11,12 +11,12 @@ serialize.saveUser = function saveUser (user, dir, callback) {
   fs.ensureDir(dir)
 
   parallel([
-    (cb) => fs.writeFile(dir + '/sign_pk', user.signKeys.pk, cb),
-    (cb) => fs.writeFile(dir + '/sign_sk', user.signKeys.sk_encrypted, 'utf8', cb),
-    (cb) => fs.writeFile(dir + '/box_pk', user.boxKeys.pk, cb),
-    (cb) => fs.writeFile(dir + '/box_sk', user.boxKeys.sk_encrypted, 'utf8', cb),
+    (cb) => fs.writeFile(dir + '/imprint', user.imprint, cb),
+    (cb) => fs.writeFile(dir + '/stamp', user.stamp_locked, 'utf8', cb),
+    (cb) => fs.writeFile(dir + '/lock', user.lock, cb),
+    (cb) => fs.writeFile(dir + '/key', user.key_locked, 'utf8', cb),
     (cb) => fs.writeFile(dir + '/cert', user.cert, cb),
-    (cb) => fs.writeFile(dir + '/salt', user.salt, cb)
+    (cb) => fs.writeFile(dir + '/salt', user._salt, cb)
   ], (err) => {
     callback(err)
   })
@@ -25,10 +25,10 @@ serialize.saveUser = function saveUser (user, dir, callback) {
 serialize.loadUser = function loadUser (pass, dir, callback) {
   dir = path.resolve(dir)
   parallel([
-    (cb) => fs.readFile(dir + '/sign_pk', cb),
-    (cb) => fs.readFile(dir + '/sign_sk', 'utf8', cb),
-    (cb) => fs.readFile(dir + '/box_pk', cb),
-    (cb) => fs.readFile(dir + '/box_sk', 'utf8', cb),
+    (cb) => fs.readFile(dir + '/imprint', cb),
+    (cb) => fs.readFile(dir + '/stamp', 'utf8', cb),
+    (cb) => fs.readFile(dir + '/lock', cb),
+    (cb) => fs.readFile(dir + '/key', 'utf8', cb),
     (cb) => fs.readFile(dir + '/cert', cb),
     (cb) => fs.readFile(dir + '/salt', cb)
   ], (err, results) => {
@@ -40,34 +40,30 @@ serialize.loadUser = function loadUser (pass, dir, callback) {
 // Create a user object whose properties match a user created by wot-identity
 // `results` is an array of file data from the parallel reads from loadUser
 function setupUser (results, pass, callback) {
-  const signPk = results[0]
-  const signSk = results[1]
-  const boxPk = results[2]
-  const boxSk = results[3]
+  const imprint = results[0]
+  const stampLocked = results[1]
+  const lock = results[2]
+  const keyLocked = results[3]
   const cert = results[4]
   const salt = results[5]
   crypto.hashPass(pass, salt, function (err, pwhash) {
     if (err) return callback(err)
-    var signSkPlain, boxSkPlain
+    var stamp, key
     try {
-      signSkPlain = crypto.decrypt(pwhash.secret, signSk)
-      boxSkPlain = crypto.decrypt(pwhash.secret, boxSk)
+      stamp = crypto.decrypt(pwhash.secret, stampLocked)
+      key = crypto.decrypt(pwhash.secret, keyLocked)
     } catch (err) {
       if (err) return callback(err)
     }
     const user = {
-      signKeys: {
-        pk: signPk,
-        sk_encrypted: signSk,
-        sk_plain: Buffer.from(signSkPlain, 'hex')
-      },
-      boxKeys: {
-        pk: boxPk,
-        sk_encrypted: boxSk,
-        sk_plain: Buffer.from(boxSkPlain, 'hex')
-      },
+      imprint: imprint,
+      stamp: Buffer.from(stamp, 'hex'),
+      stamp_locked: stampLocked,
+      lock: lock,
+      key: Buffer.from(key, 'hex'),
+      key_locked: keyLocked,
       cert: cert,
-      salt: salt
+      _salt: salt
     }
     callback(null, user)
   })
