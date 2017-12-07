@@ -12,11 +12,12 @@ serialize.saveUser = function saveUser (user, dir, callback) {
 
   parallel([
     (cb) => fs.writeFile(dir + '/imprint', user.imprint, cb),
-    (cb) => fs.writeFile(dir + '/stamp', user.stamp_locked, 'utf8', cb),
+    (cb) => fs.writeFile(dir + '/stamp', user.stamp_locked, cb),
     (cb) => fs.writeFile(dir + '/lock', user.lock, cb),
-    (cb) => fs.writeFile(dir + '/key', user.key_locked, 'utf8', cb),
+    (cb) => fs.writeFile(dir + '/key', user.key_locked, cb),
     (cb) => fs.writeFile(dir + '/cert', user.cert, cb),
-    (cb) => fs.writeFile(dir + '/salt', user._salt, cb)
+    (cb) => fs.writeFile(dir + '/salt', user._salt, cb),
+    (cb) => fs.writeFile(dir + '/stamped_users', JSON.stringify(user.stamped_users), cb)
   ], (err) => {
     callback(err)
   })
@@ -26,11 +27,12 @@ serialize.loadUser = function loadUser (pass, dir, callback) {
   dir = path.resolve(dir)
   parallel([
     (cb) => fs.readFile(dir + '/imprint', cb),
-    (cb) => fs.readFile(dir + '/stamp', 'utf8', cb),
+    (cb) => fs.readFile(dir + '/stamp', cb),
     (cb) => fs.readFile(dir + '/lock', cb),
-    (cb) => fs.readFile(dir + '/key', 'utf8', cb),
+    (cb) => fs.readFile(dir + '/key', cb),
     (cb) => fs.readFile(dir + '/cert', cb),
-    (cb) => fs.readFile(dir + '/salt', cb)
+    (cb) => fs.readFile(dir + '/salt', cb),
+    (cb) => fs.readFile(dir + '/stamped_users', cb)
   ], (err, results) => {
     if (err) return callback(err)
     setupUser(results, pass, callback)
@@ -40,12 +42,13 @@ serialize.loadUser = function loadUser (pass, dir, callback) {
 // Create a user object whose properties match a user created by wot-identity
 // `results` is an array of file data from the parallel reads from loadUser
 function setupUser (results, pass, callback) {
-  const imprint = results[0]
-  const stampLocked = results[1]
-  const lock = results[2]
-  const keyLocked = results[3]
-  const cert = results[4]
-  const salt = results[5]
+  const imprint = results[0].toString()
+  const stampLocked = results[1].toString()
+  const lock = results[2].toString()
+  const keyLocked = results[3].toString()
+  const cert = results[4].toString()
+  const salt = results[5].toString()
+  const stampedUsers = JSON.parse(results[6].toString())
   crypto.hashPass(pass, salt, function (err, pwhash) {
     if (err) return callback(err)
     var stamp, key
@@ -57,13 +60,14 @@ function setupUser (results, pass, callback) {
     }
     const user = {
       imprint: imprint,
-      stamp: Buffer.from(stamp, 'hex'),
+      stamp: stamp,
       stamp_locked: stampLocked,
       lock: lock,
-      key: Buffer.from(key, 'hex'),
+      key: key,
       key_locked: keyLocked,
       cert: cert,
-      _salt: salt
+      _salt: salt,
+      stamped_users: stampedUsers
     }
     callback(null, user)
   })
